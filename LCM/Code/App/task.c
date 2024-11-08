@@ -64,7 +64,7 @@ void KEY1_Task(void)
 	switch(KEY1_State)
 	{
 		case 1:         // Click
-			if(PWR_FLAG_BOOTED != 2)
+			if(Power_Flag != PWR_FLAG_BOOTED)
 			{
 				Power_Flag = PWR_FLAG_BOOTING;  // VESC power on
 				lcmConfigReset();
@@ -161,19 +161,19 @@ static void WS2812_VESC(void)
 	
 	switch(Footpad_Flag)
 	{
-		case 1:// Half Foot Sensors: adc1>2.5V  adc2<2.5V
+		case FOOTPAD_FLAG_LEFT:// Half Foot Sensors: adc1>2.5V  adc2<2.5V
 				WS2812_Set_AllColours(1, 5,0,green, blue);
 		break;
 		
-		case 2:// Half Foot Sensors: adc1<2.5V  adc2>2.5V
+		case FOOTPAD_FLAG_RIGHT:// Half Foot Sensors: adc1<2.5V  adc2>2.5V
 				WS2812_Set_AllColours(6, 10,0,green, blue);
 		break;
 		
-		case 3:// Both Foot Sensors: adc1>2.5V  adc2>2.5V
+		case FOOTPAD_FLAG_BOTH:// Both Foot Sensors: adc1>2.5V  adc2>2.5V
 				WS2812_Set_AllColours(1, 10,0,green,blue);
 		break;
 			
-		case 4:// Riding
+		case FOOTPAD_FLAG_NONE:// Riding
 			
 			if (Power_Display_Flag > 7) {
 				// Voltage below 30%?
@@ -202,7 +202,7 @@ static void WS2812_VESC(void)
 			}
 		break;
 
-		case 5:
+		case FOOTPAD_FLAG_FLYWHEEL:
 			// Flywheel Mode: just a rando pattern fpr now
 			red = Power_Time % 255;
 			green = (Power_Time + 100) % 255;
@@ -614,7 +614,7 @@ void Charge_Task(void)
 			{
 				CheckPowerLevel((Charge_Voltage+1)/BATTERY_STRING);
 			}
-			if((CHG_FLAG_COMPLETE == 3) && (Shutdown_Cnt > 10))
+			if((Charge_Flag == CHG_FLAG_COMPLETE) && (Shutdown_Cnt > 10))
 			{
 				if (Charge_Voltage < CHARGING_VOLTAGE)
 				{
