@@ -1,7 +1,9 @@
 #include "task.h"
+#include "flag_bit.h"
 #include "math.h"
 #include "eeprom.h"
 #include "stdlib.h"
+#include "datatypes.h"
 
 #define  BOOT_ANIMATION_COUNT  3
 #define  STATUS_BAR_IDLE_MODE_COUNT  2
@@ -54,7 +56,7 @@ int status_brightnesses[] = { WS2812_1_BRIGHTNESS, WS2812_2_BRIGHTNESS, WS2812_3
  **************************************************/
 void KEY1_Task(void)
 {
-	if(KEY1_State == 0)// || Power_Flag == 3)  //充电器供电按键不起作用
+	if(KEY1_State == 0)// || Power_Flag == PWR_FLAG_VESC_OFF)  //充电器供电按键不起作用
 	{
 		return;
 	}
@@ -62,43 +64,43 @@ void KEY1_Task(void)
 	switch(KEY1_State)
 	{
 		case 1:         // Click
-			if(Power_Flag != 2)
+			if(PWR_FLAG_BOOTED != 2)
 			{
-				Power_Flag = 1;  // VESC power on
+				Power_Flag = PWR_FLAG_BOOTING;  // VESC power on
 				lcmConfigReset();
 			}
 		break;
 
 		case 2:         // Double click
-			if(Power_Flag == 2) // Power on completed
+			if(Power_Flag == PWR_FLAG_BOOTED) // Power on completed
 			{
 				lcmConfig.isSet = false; // Ignore LCM config when manually changing brightness
-				Gear_Position++;
-				if(Gear_Position == 4)
+				Light_Profile++;
+				if (Light_Profile > LIGHT_PROFILE_3)
 				{
-					Gear_Position = 1;
+					Light_Profile = LIGHT_PROFILE_1;
 				}
 			}
 		break;
 
 		case 3:         // Long press
-			if (Power_Flag < 3) {
-				Power_Flag = 4;  // VESC power off
+			if (Power_Flag < PWR_FLAG_VESC_OFF) {
+				Power_Flag = PWR_FLAG_START_POWEROFF;  // VESC power off
 				Power_Time = 0;
 			}
 		break;
 
 		case 4:         // Three presses
-			if(Power_Flag == 2) // Boot completed
+			if(Power_Flag == PWR_FLAG_BOOTED) // Boot completed
 			{
 				Idle_Time = 0;
-				if(Buzzer_Flag == 2)
+				if(Buzzer_Flag == BUZZER_FLAG_DOUBLE)
 				{
-					Buzzer_Flag = 1;
+					Buzzer_Flag = BUZZER_FLAG_SINGLE;
 				}
 				else
 				{
-					Buzzer_Flag = 2;
+					Buzzer_Flag = BUZZER_FLAG_DOUBLE;
 				}
 			}
 		break;
@@ -146,7 +148,7 @@ static void WS2812_VESC(void)
 	uint8_t i;
 	uint8_t pos, red;
 	uint8_t green = 0;
-	uint8_t blue = WS2812_Measure;
+	uint8_t blue = Status_Bar_Brightness;
 	if (data.rpm > 250) {
 		unsigned int fade = 1 + (data.rpm - 250) / 25;	// values from 1 to 31 (max rpm allowed is 1000)
 		blue = blue / fade;
@@ -157,7 +159,7 @@ static void WS2812_VESC(void)
 		green = blue;
 	}
 	
-	switch(WS2812_Flag)
+	switch(Footpad_Flag)
 	{
 		case 1:// Half Foot Sensors: adc1>2.5V  adc2<2.5V
 				WS2812_Set_AllColours(1, 5,0,green, blue);
@@ -176,7 +178,7 @@ static void WS2812_VESC(void)
 			if (Power_Display_Flag > 7) {
 				// Voltage below 30%?
 				// Display 1/2 red dots at full brightness above anything else
-				WS2812_Power_Display(WS2812_Measure);
+				WS2812_Power_Display(Status_Bar_Brightness);
 			}
 			else if (data.dutyCycleNow > 90) {
 				WS2812_Set_AllColours(1, NUM_LEDS,255,0,0);
@@ -185,15 +187,15 @@ static void WS2812_VESC(void)
 				WS2812_Set_AllColours(1, NUM_LEDS-1,255,0,0);
 			}
 			else if (data.dutyCycleNow > 80) {
-				WS2812_Set_AllColours(1, NUM_LEDS-2,WS2812_Measure,WS2812_Measure/2,0);
+				WS2812_Set_AllColours(1, NUM_LEDS-2,Status_Bar_Brightness,Status_Bar_Brightness/2,0);
 			}
 			else if (data.dutyCycleNow > 70) {
-				WS2812_Set_AllColours(1, NUM_LEDS-3,WS2812_Measure/3,WS2812_Measure/3,0);
+				WS2812_Set_AllColours(1, NUM_LEDS-3,Status_Bar_Brightness/3,Status_Bar_Brightness/3,0);
 			}
 			else if (Power_Display_Flag > 6) {
 				// Voltage below 40%?
 				// Display 1/2/3 red dots at full brightness
-				WS2812_Power_Display(WS2812_Measure);
+				WS2812_Power_Display(Status_Bar_Brightness);
 			}
 			else {
 				WS2812_Set_AllColours(1, NUM_LEDS,0,0,0);
@@ -312,7 +314,7 @@ static void WS2812_Charge(void)
 
 static void WS2812_Disabled(void)
 {
-	int brightness = WS2812_Measure;
+	int brightness = Status_Bar_Brightness;
 	if (brightness < 20)
 		brightness = 20;
 
@@ -343,7 +345,7 @@ static void WS2818_Knight_Rider(uint8_t brightness) {
 
 
 			uint8_t brightness = (distanceToTail >= 0 && distanceToTail <= TAIL_LENGTH) ?
-								WS2812_Measure - distanceToTail * (WS2812_Measure / TAIL_LENGTH) : 0;
+								Status_Bar_Brightness - distanceToTail * (Status_Bar_Brightness / TAIL_LENGTH) : 0;
 
 			
 			WS2812_Set_Colour(i,brightness,0,0);
@@ -378,18 +380,18 @@ static void WS2812_Idle()
 			if (data.isOldPackage)
 				WS2812_Set_AllColours(1, 10, 255, 20, 255);
 			else
-				WS2818_Knight_Rider(WS2812_Measure);
+				WS2818_Knight_Rider(Status_Bar_Brightness);
 		}
 		return;
 	}
 	// Battery mode
-	WS2812_Power_Display(WS2812_Measure);
+	WS2812_Power_Display(Status_Bar_Brightness);
 }
 
 static void WS2812_Handtest(void)
 {
 	static int pulsate = 0;
-	int brightness = WS2812_Measure;
+	int brightness = Status_Bar_Brightness;
 	if (brightness < 20)
 		brightness = 20;
 	pulsate++;
@@ -416,42 +418,42 @@ void WS2812_Task(void)
 {
 	uint8_t i;
 	
-	if(Charge_Flag == 3) // Battery fully charged
+	if(Charge_Flag == CHG_FLAG_COMPLETE) // Battery fully charged
 	{
 		WS2812_Set_AllColours(1,10,50,150,50);	// white with a strong green tint
 		WS2812_Refresh();
 		return;
 	}
-	if(Charge_Flag == 2) // Charge display pattern (pulsating led)
+	if(Charge_Flag == CHG_FLAG_IN_PROGRESS) // Charge display pattern (pulsating led)
 	{
 		WS2812_Charge();
 		return;
 	}
 
-	if (WS2812_Display_Flag == 3) {
+	if (Lightbar_Display_Flag == LIGHTBAR_MODE_SHUTDOWN) {
 		WS2812_Shutdown();
 		return;
 	}
 
-	if(Power_Flag == 0 || (Power_Flag == 3 && Charge_Flag == 0))
+	if(Power_Flag == PWR_FLAG_INITIAL || (Power_Flag == PWR_FLAG_VESC_OFF && Charge_Flag == CHG_FLAG_INITIAL))
 	{
 		// Board is off
 		WS2812_Set_AllColours(1,10,0,0,0);
 		WS2812_Refresh();
-		WS2812_Display_Flag = 0;
-		WS2812_Flag = 0;
+		Lightbar_Display_Flag = LIGHTBAR_MODE_INITIAL;
+		Footpad_Flag = FOOTPAD_FLAG_INITIAL;
 		Power_Display_Flag = 0;
 		return;
 	}
 
-	if(Power_Flag == 1)
+	if(Power_Flag == PWR_FLAG_BOOTING)
 	{
 		Idle_Time = 0;
 		WS2812_Boot();
 		return;
 	}
 	
-	if (Power_Flag > 2) {
+	if (Power_Flag > PWR_FLAG_BOOTED) {
 		WS2812_Refresh();
 		Idle_Time = 0;
 		return;
@@ -459,11 +461,11 @@ void WS2812_Task(void)
 	
 	// Power Flag must be 2, aka board is ready or running
 	if (lcmConfig.isSet) {
-		WS2812_Measure = lcmConfig.statusbarBrightness;
+		Status_Bar_Brightness = lcmConfig.statusbarBrightness;
 	}
-	else if (Gear_Position >= 1 && Gear_Position <= 3)
+	else if (Light_Profile >= LIGHT_PROFILE_1 && Light_Profile <= LIGHT_PROFILE_3)
 	{
-		WS2812_Measure = status_brightnesses[Gear_Position - 1];
+		Status_Bar_Brightness = status_brightnesses[Light_Profile - 1];
 	}
 
 	if (data.state == DISABLED) {
@@ -473,7 +475,7 @@ void WS2812_Task(void)
 		WS2812_Handtest();
 	}
 	else {
-		if (WS2812_Display_Flag == 1) {
+		if (Lightbar_Display_Flag == LIGHTBAR_MODE_BATTERY) {
 			// Idle state - no footpads pressed
 			WS2812_Idle();	// Idle animation
 		} else {
@@ -497,11 +499,11 @@ void Power_Task(void)
 	if (Power_Flag == 4) {
 		if(Power_Time > VESC_SHUTDOWN_TIME)
 		{
-			Power_Flag = 3;
+			Power_Flag = PWR_FLAG_VESC_OFF;
 		}
 	}
 	
-	if(power_flag_last == Power_Flag && Power_Flag != 1)
+	if(power_flag_last == Power_Flag && Power_Flag != PWR_FLAG_BOOTING)
 	{
 		return;
 	}
@@ -509,7 +511,7 @@ void Power_Task(void)
 	
 	switch(Power_Flag)
 	{
-		case 1://VESC Power On
+		case PWR_FLAG_BOOTING://VESC Power On
 			PWR_ON;
 			switch(power_step)
 			{
@@ -521,24 +523,24 @@ void Power_Task(void)
 				case 1:
 					if(Power_Time > VESC_BOOT_TIME)
 					{
-						Power_Flag = 2; // Boot completed
-						Gear_Position = 1; // The default setting is 1st gear after power-on.
-						Buzzer_Flag = 2;    // The default buzzer sounds when powering on
+						Power_Flag = PWR_FLAG_BOOTED; // Boot completed
+						Light_Profile = LIGHT_PROFILE_1; // The default setting is 1st gear after power-on.
+						Buzzer_Flag = BUZZER_FLAG_DOUBLE;    // The default buzzer sounds when powering on
 						power_step = 0;
-						WS2812_Display_Flag = 1;
+						Lightbar_Display_Flag = LIGHTBAR_MODE_BATTERY;
 					}
 				break;
 			}
 			
 		break;	
 
-		case 3:// VESC is shut down (either auto-shutdown or button press)
-			WS2812_Display_Flag = 0;
+		case PWR_FLAG_VESC_OFF:// VESC is shut down (either auto-shutdown or button press)
+			Lightbar_Display_Flag = LIGHTBAR_MODE_INITIAL;
 			PWR_OFF 
 		break;
 
-		case 4:// New Power state for shutdown sequence
-			WS2812_Display_Flag = 3;
+		case PWR_FLAG_START_POWEROFF:// New Power state for shutdown sequence
+			Lightbar_Display_Flag = LIGHTBAR_MODE_SHUTDOWN;
 		default:
 		break;
 	}
@@ -581,7 +583,7 @@ void Charge_Task(void)
 	static uint8_t charge_step = 0;
 	bool isAboveCutoff = false;//lcmConfig.chargeCutoffVoltage > 0 && Charge_Voltage > lcmConfig.chargeCutoffVoltage;
 
-	if(Charge_Flag > 0)
+	if(Charge_Flag > CHG_FLAG_INITIAL)
 	{
 		if(V_I == 0 && Charge_Time > 150)
 		{
@@ -590,10 +592,10 @@ void Charge_Task(void)
 				if(Shutdown_Cnt>2000)
 				{
 					if (isAboveCutoff || Charge_Voltage > FULL_VOLTAGE) {
-						Charge_Flag = 3;
+						Charge_Flag = CHG_FLAG_COMPLETE;
 					}
 					else {
-						Charge_Flag = 0;
+						Charge_Flag = CHG_FLAG_INITIAL;
 					}
 					Charge_Time = 0;
 					V_I = 1;
@@ -608,16 +610,16 @@ void Charge_Task(void)
 		}
 		else
 		{
-			if((Charge_Flag == 2) && (Charge_Time > 150))
+			if((Charge_Flag == CHG_FLAG_IN_PROGRESS) && (Charge_Time > 150))
 			{
 				CheckPowerLevel((Charge_Voltage+1)/BATTERY_STRING);
 			}
-			if((Charge_Flag == 3) && (Shutdown_Cnt > 10))
+			if((CHG_FLAG_COMPLETE == 3) && (Shutdown_Cnt > 10))
 			{
 				if (Charge_Voltage < CHARGING_VOLTAGE)
 				{
 					// wait for charger to get unplugged to reset back to normal state
-					Charge_Flag = 0;
+					Charge_Flag = CHG_FLAG_INITIAL;
 					charge_step = 0;
 					Charge_Voltage = 0;
 					Charger_Detection_1ms = 0;
@@ -625,16 +627,16 @@ void Charge_Task(void)
 			}
 		}
 	}
-	else //	Charge_Flag == 0
+	else //	Charge_Flag == CHG_FLAG_INITIAL
 	{
 		charge_step = 0;
 		if(Charge_Voltage > CHARGING_VOLTAGE)// && (Charge_Current > 0.1))
 		{
 			if(Charger_Detection_1ms > CHARGER_DETECTION_DELAY)
 			{
-				if (Charge_Flag != 2)
-					Charge_Flag = 1;
-				WS2812_Display_Flag = 0;
+				if (Charge_Flag != CHG_FLAG_IN_PROGRESS)
+					Charge_Flag = CHG_FLAG_READY;
+				Lightbar_Display_Flag = LIGHTBAR_MODE_INITIAL;
 			}
 		}
 		else {
@@ -659,9 +661,9 @@ void Charge_Task(void)
 		
 		case 2:
 			CHARGE_ON;
-			Charge_Flag = 2;
+			Charge_Flag = CHG_FLAG_IN_PROGRESS;
 			charge_step = 3;
-			//Power_Flag = 1;	// Boot the VESC
+			//Power_Flag = PWR_FLAG_BOOTING;	// Boot the VESC
 		break;
 		
 		case 3:
@@ -733,7 +735,7 @@ static void Set_Headlights_Brightness(int brightness)
  **************************************************/
 void Headlights_Task(void)
 {
-	static uint8_t gear_position_last = 0;
+	static uint8_t light_profile_last = 0;
 	static bool isForward = false;
 
 	if (Flashlight_Time < 10) {
@@ -741,7 +743,7 @@ void Headlights_Task(void)
 	}
 	Flashlight_Time = 0;
 
-	if(Power_Flag != 2) // Lights off 
+	if(Power_Flag != PWR_FLAG_BOOTED) // Lights off 
 	{
 		LED_B_OFF;
 		LED_F_OFF;
@@ -772,8 +774,8 @@ void Headlights_Task(void)
 			new_brightness = lcmConfig.headlightBrightness;
 		}
 		else {
-			if (Gear_Position >= 1 && Gear_Position <= 3) {
-				new_brightness = headlight_brightnesses[Gear_Position - 1];
+			if (Light_Profile >= LIGHT_PROFILE_1 && Light_Profile <= LIGHT_PROFILE_3) {
+				new_brightness = headlight_brightnesses[Light_Profile - 1];
 			}
 		}
 		new_brightness *= data.isForward ? 1 : -1;
@@ -789,16 +791,16 @@ void Headlights_Task(void)
 			}
 		}
 
-		if (gear_position_last == Gear_Position && Flashlight_Detection_Time >= 3100) {
+		if (light_profile_last == Light_Profile && Flashlight_Detection_Time >= 3100) {
 			Flashlight_Detection_Time = 3100;
 		}
 		else {
 			// User double-pressed the power button, show the new brightness when idle
 			Flashlight_Detection_Time = 0;
-			if (Gear_Position >= 1 && Gear_Position <= 3 && !lcmConfig.isSet) {
-				new_brightness = headlight_brightnesses[Gear_Position - 1];
+			if (Light_Profile >= LIGHT_PROFILE_1 && Light_Profile <= LIGHT_PROFILE_3 && !lcmConfig.isSet) {
+				new_brightness = headlight_brightnesses[Light_Profile - 1];
 			}
-			gear_position_last = Gear_Position;
+			light_profile_last = Light_Profile;
 		}
 	}
 	if (new_brightness != Target_Headlight_Brightness) {
@@ -815,18 +817,18 @@ void Headlights_Task(void)
 void Buzzer_Task(void)
 {
 	static uint8_t buzzer_step = 0;
-	static uint8_t gear_position_last = 0;
+	static uint8_t light_profile_last = 0;
 	static uint8_t ring_frequency = 0;
 	static uint16_t sound_frequency = 0;
 
-	if(Power_Flag != 2 || Buzzer_Flag == 1)
+	if(Power_Flag != PWR_FLAG_BOOTED || Buzzer_Flag == BUZZER_FLAG_SINGLE)
 	{
 		BUZZER_OFF;
 		buzzer_step = 0;
 		return;
 	}
 	
-	if(Buzzer_Frequency == 0 && gear_position_last == Gear_Position)
+	if(Buzzer_Frequency == 0 && light_profile_last == Light_Profile)
 	{
 		BUZZER_OFF;
 		buzzer_step = 0;
@@ -879,10 +881,10 @@ void Buzzer_Task(void)
 				{	
 					ring_frequency++;
 					buzzer_step = 0;
-					if(ring_frequency >= Gear_Position)
+					if(ring_frequency >= Light_Profile)
 					{
 						ring_frequency = 0;
-						gear_position_last = Gear_Position;
+						light_profile_last = Light_Profile;
 					}
 					
 				}
@@ -906,7 +908,7 @@ void Usart_Task(void)
 	static uint8_t commandIndex = 0; // Store a rotating index so we can implement relevant frequencies of commands
 	uint8_t result;
 
-	if(Power_Flag != 2)
+	if(Power_Flag != PWR_FLAG_BOOTED)
 	{
 		// legacy/motor data
 		data.rpm = 0;
@@ -1062,7 +1064,7 @@ void ADC_Task(void)
  **************************************************/
 void VESC_State_Task(void)
 {
-	if ((Charge_Flag > 0) || (Power_Flag != 2) || !Vesc_Data_Ready)
+	if ((Charge_Flag > CHG_FLAG_INITIAL) || (Power_Flag != PWR_FLAG_BOOTED) || !Vesc_Data_Ready)
 		return;
 
 	Vesc_Data_Ready = false;
@@ -1097,8 +1099,8 @@ void VESC_State_Task(void)
 	}
 	
 	if(data.state == RUNNING_FLYWHEEL) {
-		WS2812_Display_Flag = 2;
-		WS2812_Flag = 5;
+		Lightbar_Display_Flag = LIGHTBAR_MODE_NO_BATTERY;
+		Footpad_Flag = FOOTPAD_FLAG_FLYWHEEL;
 		Buzzer_Frequency = 0;
 	}
 	else if(data.rpm<VESC_RPM)
@@ -1107,30 +1109,30 @@ void VESC_State_Task(void)
 		{
 			if((data.state == 0) || (data.state >= FAULT_ANGLE_PITCH))
 			{   // disengaged board
-				WS2812_Display_Flag = 1;
+				Lightbar_Display_Flag = LIGHTBAR_MODE_BATTERY;
 			}
 		}
 		else {
-			WS2812_Display_Flag = 2;
+			Lightbar_Display_Flag = LIGHTBAR_MODE_NO_BATTERY;
 			if(ADC1_Val > 2.9 && ADC2_Val > 2.9)
 			{
-				WS2812_Flag = 3;
+				Footpad_Flag = FOOTPAD_FLAG_BOTH;
 			}
 			else if(ADC1_Val >2.9)
 			{
-				WS2812_Flag = 1;
+				Footpad_Flag = FOOTPAD_FLAG_LEFT;
 			}
 			else
 			{
-				WS2812_Flag = 2;
+				Footpad_Flag = FOOTPAD_FLAG_RIGHT;
 			}
 		}
 	}
 	else
 	{
 		// Add check for low voltage to force voltage display on WS2812!
-		WS2812_Display_Flag = 2;
-		WS2812_Flag = 4;	// Normal Riding!
+		Lightbar_Display_Flag = LIGHTBAR_MODE_NO_BATTERY;
+		Footpad_Flag = FOOTPAD_FLAG_NONE;	// Normal Riding!
 	}
 	
 	// No movement and no ADCs? Shutdown after timeout (10-30min)
@@ -1147,7 +1149,7 @@ void VESC_State_Task(void)
 		Shutdown_Time_M++;
 		if(Shutdown_Time_M >= SHUTDOWN_TIME)//lcmConfig.autoShutdownTime)
 		{
-			Power_Flag = 4;
+			Power_Flag = PWR_FLAG_START_POWEROFF;
 			Power_Time = 0;
 		}
 	}
@@ -1155,7 +1157,7 @@ void VESC_State_Task(void)
 	if(((Shutdown_Time_M > 0) || (Shutdown_Time_S >= 10000)) && (lcmConfig.boardOff))
 	{
 		// After 10 seconds of idle we allow the board to be shut down via app
-		Power_Flag = 4;
+		Power_Flag = PWR_FLAG_START_POWEROFF;
 		Power_Time = 0;
 	}
 	lcmConfig.boardOff = false;

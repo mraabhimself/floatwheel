@@ -1,4 +1,5 @@
 #include "vesc_uasrt.h"
+#include "datatypes.h"
 #include "flag_bit.h"
 #include "eeprom.h"
 #include "task.h"
@@ -107,7 +108,7 @@ void Get_Vesc_Pack_Data(COMM_PACKET_ID id)
 		command[1] = 101;
 		command[2] = 28; 											// FLOAT_COMMAND_CHARGESTATE
  		command[3] = 151; 											// -charging: 1/0 aka true/false
- 		command[4] = Charge_Flag == 2 ? 1: 0; 						// -charging: 1/0 aka true/false
+ 		command[4] = Charge_Flag == CHG_FLAG_IN_PROGRESS ? 1: 0; 						// -charging: 1/0 aka true/false
 		uint8_t ind = 5;
 		buffer_append_float16(command, Charge_Voltage, 10, &ind); 	// -voltage: 16bit float divided by 10
 		buffer_append_float16(command, Charge_Current, 10, &ind); 	// -current: 16bit float divided by 10
@@ -121,8 +122,8 @@ void Get_Vesc_Pack_Data(COMM_PACKET_ID id)
 		command[3] = Power_Flag;
 		command[4] = Charge_Flag;
 		command[5] = data.dutyCycleNow;
-		command[6] = WS2812_Display_Flag;
-		command[7] = WS2812_Flag;
+		command[6] = Lightbar_Display_Flag;
+		command[7] = Footpad_Flag;
 		command[8] = Shutdown_Time_M;
 		command[9] = Shutdown_Time_S / 1000;
 		command[10] = GPIOC->IDR;

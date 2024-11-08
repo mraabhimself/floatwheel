@@ -5,8 +5,8 @@
 
 extern uint8_t Power_Flag;
 extern uint8_t Charge_Flag;
-extern uint8_t WS2812_Display_Flag;
-extern uint8_t WS2812_Flag;
+extern uint8_t Lightbar_Display_Flag;
+extern uint8_t Footpad_Flag;
 extern uint8_t Power_Display_Flag;
 extern uint8_t Buzzer_Flag;
 extern uint8_t Vesc_Data_Ready;
@@ -24,8 +24,8 @@ extern uint8_t Shutdown_Time_M;
 extern float ADC1_Val;
 extern float ADC2_Val;
 extern float Charge_Voltage;
-extern uint8_t Gear_Position;
-extern uint8_t WS2812_Measure;
+extern uint8_t Light_Profile;
+extern uint8_t Status_Bar_Brightness;
 extern uint8_t Buzzer_Frequency;
 extern uint16_t Flashlight_Detection_Time;
 extern float Charge_Current;
