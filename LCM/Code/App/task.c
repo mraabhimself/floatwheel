@@ -1103,7 +1103,7 @@ void VESC_State_Task(void)
 	}
 	else if(data.rpm<VESC_RPM)
 	{
-		if(ADC1_Val < 2.0 && ADC2_Val <2.0)
+		if(ADC1_Val < 2.0 && ADC2_Val < 2.0)
 		{
 			if((data.state == 0) || (data.state >= FAULT_ANGLE_PITCH))
 			{   // disengaged board
@@ -1116,11 +1116,11 @@ void VESC_State_Task(void)
 			{
 				Footpad_Flag = FOOTPAD_FLAG_BOTH;
 			}
-			else if(ADC1_Val >2.9)
+			else if(ADC1_Val > 2.9)
 			{
 				Footpad_Flag = FOOTPAD_FLAG_LEFT;
 			}
-			else
+			else if (ADC2_Val > 2.9)
 			{
 				Footpad_Flag = FOOTPAD_FLAG_RIGHT;
 			}
