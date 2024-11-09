@@ -7,7 +7,7 @@ extern uint8_t Power_Flag;
 extern uint8_t Charge_Flag;
 extern uint8_t Lightbar_Display_Flag;
 extern uint8_t Footpad_Flag;
-extern uint8_t Power_Display_Flag;
+extern uint8_t Battery_Level;
 extern uint8_t Buzzer_Flag;
 extern uint8_t Vesc_Data_Ready;
 

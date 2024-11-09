@@ -117,7 +117,6 @@ void KEY1_Task(void)
  **************************************************/
 static void WS2812_Power_Display(uint8_t brightness)
 {
-	uint8_t numleds = 11 - Power_Display_Flag;
 	uint8_t r = 0;
 	uint8_t g = 0;
 	uint8_t b = 0;
@@ -125,13 +124,13 @@ static void WS2812_Power_Display(uint8_t brightness)
 	// 40% and below: yellow
 	// > 40% white
 	r = brightness;
-	if (numleds > 2)
+	if (Battery_Level > 2)
 		g = brightness;
-	if (numleds > 4)
+	if (Battery_Level > 4)
 		b = brightness;
 	
-	if (Power_Display_Flag > 0) {
-		WS2812_Set_AllColours(1, numleds, r, g, b);
+	if (Battery_Level > 0) {
+		WS2812_Set_AllColours(1, Battery_Level, r, g, b);
 	} else {
 		// Two purple LEDs in the center, only needed for dev/debug (happens right after boot)
 		//WS2812_Set_AllColours(5, 6, brightness, 0, brightness);
@@ -175,7 +174,7 @@ static void WS2812_VESC(void)
 			
 		case FOOTPAD_FLAG_NONE:// Riding
 			
-			if (Power_Display_Flag > 7) {
+			if (Battery_Level < 3) {
 				// Voltage below 30%?
 				// Display 1/2 red dots at full brightness above anything else
 				WS2812_Power_Display(Status_Bar_Brightness);
@@ -192,7 +191,7 @@ static void WS2812_VESC(void)
 			else if (data.dutyCycleNow > 70) {
 				WS2812_Set_AllColours(1, NUM_LEDS-3,Status_Bar_Brightness/3,Status_Bar_Brightness/3,0);
 			}
-			else if (Power_Display_Flag > 6) {
+			else if (Battery_Level < 4) {
 				// Voltage below 40%?
 				// Display 1/2/3 red dots at full brightness
 				WS2812_Power_Display(Status_Bar_Brightness);
@@ -368,8 +367,8 @@ static void WS2818_Knight_Rider(uint8_t brightness) {
 static void WS2812_Idle()
 {
 	if (Idle_Time > 3000) {
-		if (Power_Display_Flag > 9) {
-			// Voltage below 10%? Flash bright red!
+		if (Battery_Level == 1) {
+			// Voltage <= 10%? Flash bright red!
 			WS2812_Set_AllColours(1, 10, 255, 20, 20);
 			WS2812_Refresh();
 			if (Idle_Time > 3040) {
@@ -442,7 +441,7 @@ void WS2812_Task(void)
 		WS2812_Refresh();
 		Lightbar_Display_Flag = LIGHTBAR_MODE_INITIAL;
 		Footpad_Flag = FOOTPAD_FLAG_INITIAL;
-		Power_Display_Flag = 0;
+		Battery_Level = 0;
 		return;
 	}
 
@@ -548,29 +547,28 @@ void Power_Task(void)
 
 void CheckPowerLevel(float battery_voltage)
 {
-	float battVoltages[10] = {4.054, 4.01, 3.908, 3.827, 3.74, 3.651, 3.571, 3.485, 3.38, 3.0}; //P42A
-	//float battVoltages[10] = {4.07, 4.025, 3.91, 3.834, 3.746, 3.607, 3.49, 3.351, 3.168, 2.81}}; //DG40
-	//float battcellcurve[10] = {4.054, 4.01, 3.908, 3.827, 3.74, 3.651, 3.571, 3.485, 3.38, 3.0};   //P42A
-								   //{4.07, 4.025, 3.91, 3.834, 3.746, 3.607, 3.49, 3.351, 3.168, 2.81}}; //DG40
-	//static uint8_t cell_type_last = 1; //CELL_TYPE P42A equates out to 0
+	float battVoltages[10] = {
+		3.0,
+		3.38,
+		3.485,
+		3.571,
+		3.651,
+		3.74,
+		3.827,
+		3.908,
+		4.01,
+		4.054
+	}; //P42A
 
-	/*if (CELL_TYPE != cell_type_last) // If !P42a run once at boot or on change
-	{
-		cell_type_last = CELL_TYPE;
-		for (int i=0;i<10;i++)
-		{
-			battVoltages[i] = battcellcurves[cell_type_last][i];
-		}
-	}*/
 
 	// Default: Between zero and min voltage
-	Power_Display_Flag = 10;
-	for (int i=0;i<10;i++) {
-		if (battery_voltage > battVoltages[i]) {
-			Power_Display_Flag = i + 1;
-			break;
-		}
+	Battery_Level = 0;
+	int i = 0;
+	while (i < 9 && battery_voltage > battVoltages[i] ) {
+		i++;
 	}
+
+	Battery_Level = i+1;
 }
 
 /**************************************************

@@ -9,19 +9,9 @@ uint8_t Footpad_Flag = FOOTPAD_FLAG_INITIAL;
 uint8_t Buzzer_Flag = BUZZER_FLAG_OFF;
 
 /*
-	Power_Display_Flag = 0; // Off
-	Power_Display_Flag = 1; // 4.08V ~ 4.2V 10 bars
-	Power_Display_Flag = 2; // 4.05V ~ 4.08V 9 bars
-	Power_Display_Flag = 3; // 3.96V ~ 4.05V 8 bars
-	Power_Display_Flag = 4; // 3.87V ~ 3.96V 7 bars
-	Power_Display_Flag = 5; // 3.78V ~ 3.87V 6 bars
-	Power_Display_Flag = 6; // 3.70V ~ 3.78V 5 bars
-	Power_Display_Flag = 7; // 3.62V ~ 3.70V 4 bars
-	Power_Display_Flag = 8; // 3.50V ~ 3.62V 3 bars
-	Power_Display_Flag = 9; // 3.35V ~ 3.50V 2 bars
-	Power_Display_Flag = 10; // 2.80V ~ 3.35V 1 bar
+	Battery_Level - 0 = Off, 1-10 maps to 10-100%
 */
-uint8_t Power_Display_Flag = 0;
+uint8_t Battery_Level = 0;
 
 /*
 	Usart_Flag = Vesc_Data_Ready
