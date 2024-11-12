@@ -356,7 +356,7 @@ uint8_t Protocol_Parse(uint8_t * message)
 			data.avgInputCurrent = buffer_get_float16(pdata, 1.0, &ind);
 
 			float v = buffer_get_float16(pdata, 10.0, &ind);
-			if (data.inpVoltage < BATTERY_STRING * 2.5)
+			if (data.inpVoltage < BATTERY_PACK_SERIES * 2.5)
 				data.inpVoltage = v;
 			else
 				data.inpVoltage = data.inpVoltage * 0.9 + 0.1 * v;
