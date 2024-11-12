@@ -2,8 +2,11 @@
 #include "flag_bit.h"
 #include "math.h"
 #include "eeprom.h"
-#include "stdlib.h"
 #include "datatypes.h"
+#include "key.h"
+#include "led.h"
+#include "vesc_uasrt.h"
+#include "ws2812.h"
 
 #define  BOOT_ANIMATION_COUNT  3
 #define  STATUS_BAR_IDLE_MODE_COUNT  2
@@ -610,8 +613,8 @@ void Charge_Task(void)
 		{
 			if((Charge_Flag == CHG_FLAG_IN_PROGRESS) && (Charge_Time > 150))
 			{
-				CheckPowerLevel((Charge_Voltage+1)/BATTERY_STRING);
-			}
+        CheckPowerLevel((Charge_Voltage + 1) / BATTERY_PACK_SERIES);
+      }
 			if((Charge_Flag == CHG_FLAG_COMPLETE) && (Shutdown_Cnt > 10))
 			{
 				if (Charge_Voltage < CHARGING_VOLTAGE)
@@ -1069,8 +1072,8 @@ void VESC_State_Task(void)
 
 	// Not charging? Get voltage from VESC
 	if (data.inpVoltage > 0) {
-		CheckPowerLevel((data.inpVoltage+1)/BATTERY_STRING);
-	}
+  	CheckPowerLevel((data.inpVoltage + 1) / BATTERY_PACK_SERIES);
+  }
 
 	if(data.dutyCycleNow < 0)
 	{

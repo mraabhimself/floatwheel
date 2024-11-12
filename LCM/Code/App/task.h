@@ -1,36 +1,12 @@
 #ifndef __TASK_H
 #define __TASK_H
 
-#include "led.h"
-#include "key.h"
-#include "ws2812.h"
-#include "flag_bit.h"
-#include "vesc_uasrt.h"
-
-typedef enum
-{
+typedef enum {
 	P42A,
 	DG40
 } CELL_TYPE;
 
-//#define PINTV
-//#define XRV
-//#define GTV
-//#define ADV
-
-#define USE_BUZZER
-
 #define   CELL_TYPE                 P42A        // Cell configuration to use for voltage display (P42A, DG40)
-
-#if defined(GTV)
-#define   BATTERY_STRING      		18
-#elif defined(PINTV) || defined(XRV)
-#define   BATTERY_STRING      		15
-#elif defined(ADV)
-#define   BATTERY_STRING      		20
-#define	  FULL_VOLTAGE	  			82
-#define	  CHARGING_VOLTAGE	  		40
-#endif
 
 #define   SHUTDOWN_TIME		  		10
 #define   VESC_RPM            		1000
