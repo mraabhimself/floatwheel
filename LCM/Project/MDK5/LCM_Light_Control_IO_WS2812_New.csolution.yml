@@ -7,6 +7,7 @@ solution:
   define:
     # - USE_EEPROM
     - USE_BUZZER
+    - DUTY_CYCLE_BEEP_PERCENT: 90
 
   target-types:
     - type: ADV

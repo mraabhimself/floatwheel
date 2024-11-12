@@ -22,8 +22,8 @@ static void lcmConfigReset(void)
 	lcmConfig.headlightIdleBrightness = 0;
 	lcmConfig.statusbarBrightness = 5;
 	lcmConfig.boardOff = 0;
-	lcmConfig.dutyBeep = 90;
-	/*
+	lcmConfig.dutyBeep = DUTY_CYCLE_BEEP_PERCENT;
+	
 	lcmConfig.statusBarIdleMode = DEFAULT_IDLE_MODE;
 	lcmConfig.chargeCutoffVoltage = 0;
 	lcmConfig.bootAnimation = BOOT_DEFAULT;
@@ -36,7 +36,7 @@ static void lcmConfigReset(void)
 
 	EEPROM_ReadByte(DUTY_BEEP, &lcmConfig.dutyBeep);
 	if (lcmConfig.dutyBeep < 1 || lcmConfig.dutyBeep > 100) {
-		lcmConfig.dutyBeep = 90;
+		lcmConfig.dutyBeep = DUTY_CYCLE_BEEP_PERCENT;
 	}
 
 	EEPROM_ReadByte(STATUS_BAR_IDLE_MODE, &lcmConfig.statusBarIdleMode);
