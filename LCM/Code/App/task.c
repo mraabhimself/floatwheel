@@ -23,7 +23,7 @@ static void lcmConfigReset(void)
 	lcmConfig.statusbarBrightness = 5;
 	lcmConfig.boardOff = 0;
 	lcmConfig.dutyBeep = DUTY_CYCLE_BEEP_PERCENT;
-	
+	/*
 	lcmConfig.statusBarIdleMode = DEFAULT_IDLE_MODE;
 	lcmConfig.chargeCutoffVoltage = 0;
 	lcmConfig.bootAnimation = BOOT_DEFAULT;
@@ -47,8 +47,7 @@ static void lcmConfigReset(void)
 	EEPROM_ReadByte(AUTO_SHUTDOWN, &lcmConfig.autoShutdownTime);
 	if (lcmConfig.autoShutdownTime <= 0) {
 		lcmConfig.autoShutdownTime = AUTO_SHUTDOWN_TIME;
-	}
-	#endif
+	} */
 }
 
 // brightnesses for Gear 1, 2, 3:
