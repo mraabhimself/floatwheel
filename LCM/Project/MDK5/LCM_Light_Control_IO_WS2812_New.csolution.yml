@@ -8,6 +8,7 @@ solution:
     # - USE_EEPROM
     - USE_BUZZER
     - DUTY_CYCLE_BEEP_PERCENT: 90
+    - AUTO_SHUTDOWN_TIME: 10
 
   target-types:
     - type: ADV

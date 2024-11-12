@@ -27,7 +27,7 @@ static void lcmConfigReset(void)
 	lcmConfig.statusBarIdleMode = DEFAULT_IDLE_MODE;
 	lcmConfig.chargeCutoffVoltage = 0;
 	lcmConfig.bootAnimation = BOOT_DEFAULT;
-	lcmConfig.autoShutdownTime = SHUTDOWN_TIME;
+	lcmConfig.autoShutdownTime = AUTO_SHUTDOWN_TIME;
 	
 	EEPROM_ReadByte(BOOT_ANIMATION, &lcmConfig.bootAnimation);
 	if (lcmConfig.bootAnimation < 0 || lcmConfig.bootAnimation >= BOOT_ANIMATION_COUNT) {
@@ -46,8 +46,9 @@ static void lcmConfigReset(void)
 
 	EEPROM_ReadByte(AUTO_SHUTDOWN, &lcmConfig.autoShutdownTime);
 	if (lcmConfig.autoShutdownTime <= 0) {
-		lcmConfig.autoShutdownTime = SHUTDOWN_TIME;
-	}*/
+		lcmConfig.autoShutdownTime = AUTO_SHUTDOWN_TIME;
+	}
+	#endif
 }
 
 // brightnesses for Gear 1, 2, 3:
@@ -1148,7 +1149,7 @@ void VESC_State_Task(void)
 		Shutdown_Time_S = 0;
 		
 		Shutdown_Time_M++;
-		if(Shutdown_Time_M >= SHUTDOWN_TIME)//lcmConfig.autoShutdownTime)
+		if(Shutdown_Time_M >= AUTO_SHUTDOWN_TIME)//lcmConfig.autoShutdownTime)
 		{
 			Power_Flag = PWR_FLAG_START_POWEROFF;
 			Power_Time = 0;
