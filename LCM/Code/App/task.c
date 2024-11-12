@@ -7,6 +7,7 @@
 #include "led.h"
 #include "vesc_uasrt.h"
 #include "ws2812.h"
+#include "lcm.h"
 
 #define  BOOT_ANIMATION_COUNT  3
 #define  STATUS_BAR_IDLE_MODE_COUNT  2
@@ -175,7 +176,7 @@ static void WS2812_VESC(void)
 				WS2812_Set_AllColours(1, 10,0,green,blue);
 		break;
 			
-		case FOOTPAD_FLAG_NONE:// Riding
+		case FOOTPAD_FLAG_RIDING:// Riding
 			
 			if (Battery_Level < 3) {
 				// Voltage below 30%?
@@ -1133,7 +1134,7 @@ void VESC_State_Task(void)
 	{
 		// Add check for low voltage to force voltage display on WS2812!
 		Lightbar_Display_Flag = LIGHTBAR_MODE_NO_BATTERY;
-		Footpad_Flag = FOOTPAD_FLAG_NONE;	// Normal Riding!
+		Footpad_Flag = FOOTPAD_FLAG_RIDING;	// Normal Riding!
 	}
 	
 	// No movement and no ADCs? Shutdown after timeout (10-30min)

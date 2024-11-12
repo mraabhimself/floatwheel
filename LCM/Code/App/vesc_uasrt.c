@@ -93,7 +93,7 @@ void Get_Vesc_Pack_Data(COMM_PACKET_ID id)
 	
 	if (id == COMM_CUSTOM_APP_DATA) {
 		command[1] = 101;
-		command[2] = FLOAT_COMMAND_LCM_POLL;
+		command[2] = COMMAND_LCM_POLL;
 		len = 3;
 		if (!lcmConfig.isSet) {
 			// write firmware id string to command
@@ -106,7 +106,7 @@ void Get_Vesc_Pack_Data(COMM_PACKET_ID id)
 	if (id == COMM_CHARGE_INFO) {
 		command[0] = COMM_CUSTOM_APP_DATA;
 		command[1] = 101;
-		command[2] = FLOAT_COMMAND_LCM_CHARGESTATE;
+		command[2] = COMMAND_LCM_CHARGESTATE;
  		command[3] = 151; 											// -charging: 1/0 aka true/false
  		command[4] = Charge_Flag == CHG_FLAG_IN_PROGRESS ? 1: 0; 						// -charging: 1/0 aka true/false
 		uint8_t ind = 5;
@@ -118,7 +118,7 @@ void Get_Vesc_Pack_Data(COMM_PACKET_ID id)
 	if (id == COMM_CUSTOM_DEBUG) {
 		command[0] = COMM_CUSTOM_APP_DATA;
 		command[1] = 101;
-		command[2] = FLOAT_COMMAND_LCM_DEBUG;
+		command[2] = COMMAND_LCM_DEBUG;
 		command[3] = Power_Flag;
 		command[4] = Charge_Flag;
 		command[5] = data.dutyCycleNow;
@@ -335,7 +335,7 @@ uint8_t Protocol_Parse(uint8_t * message)
 			}
 		  	uint8_t magicnr = pdata[ind++];
 		  	uint8_t floatcmd = pdata[ind++];
-			if ((magicnr != 101) || (floatcmd != FLOAT_COMMAND_LCM_POLL)) {
+			if ((magicnr != 101) || (floatcmd != COMMAND_LCM_POLL)) {
 				break;
 			}
 			data.floatPackageSupported = true;

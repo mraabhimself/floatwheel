@@ -6,35 +6,7 @@
 #include "crc.h"
 #include "usart.h"
 #include "datatypes.h"
-
-
-typedef struct {
-	bool floatPackageSupported;
-	float avgInputCurrent;
-	int dutyCycleNow;	// duty when running
-	int pitch;			// pitch when idle
-	float inpVoltage;
-	long rpm;
-	char state;
-	char fault;
-	bool isForward;
-	bool isHandtest;
-	bool isOldPackage;
-}dataPackage;
-
-typedef struct {
-	uint8_t headlightBrightness;
-	uint8_t headlightIdleBrightness;
-	uint8_t statusbarBrightness;
-	//StatusBarIdleMode statusBarIdleMode;
-	uint8_t dutyBeep;
-	//float chargeCutoffVoltage;
-	//uint8_t autoShutdownTime;
-	bool boardOff;
-	//BootAnimation bootAnimation;
-	bool isSet;
-	bool debug;
-}lcmConfig_t;
+#include "lcm.h"
 
 extern uint8_t VESC_RX_Buff[80];
 extern uint8_t VESC_RX_Flag;
