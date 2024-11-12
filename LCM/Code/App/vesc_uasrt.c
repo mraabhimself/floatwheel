@@ -1,8 +1,11 @@
 #include "vesc_uasrt.h"
+#include "crc.h"
 #include "datatypes.h"
-#include "flag_bit.h"
 #include "eeprom.h"
-#include "task.h"
+#include "flag_bit.h"
+#include "hk32f030m.h"
+#include "usart.h"
+#include <string.h>
 
 uint8_t VESC_RX_Buff[80];
 uint8_t VESC_RX_Flag = 0;
