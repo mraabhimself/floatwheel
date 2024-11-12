@@ -119,22 +119,18 @@ void KEY1_Task(void)
  * @brie   :WS2812_Power_Display()
  * @note   :display 1..10 leds depending on power level
  **************************************************/
-static void WS2812_Power_Display(uint8_t brightness)
-{
-	uint8_t r = 0;
-	uint8_t g = 0;
-	uint8_t b = 0;
-	// 20% and below: red
-	// 40% and below: yellow
-	// > 40% white
-	r = brightness;
-	if (Battery_Level > 2)
-		g = brightness;
-	if (Battery_Level > 4)
-		b = brightness;
-	
-	if (Battery_Level > 0) {
-		WS2812_Set_AllColours(1, Battery_Level, r, g, b);
+static void WS2812_Power_Display(uint8_t brightness) {
+  uint8_t r = brightness; // 0% - 20% = red
+  uint8_t g, b = 0;
+
+  if (Battery_Level > 2) // 20% - 40% = yellow
+    g = brightness;
+
+  if (Battery_Level > 4) // 40% - 100% = white
+    b = brightness;
+
+  if (Battery_Level > 0) {
+    WS2812_Set_AllColours(1, Battery_Level, r, g, b);
 	} else {
 		// Two purple LEDs in the center, only needed for dev/debug (happens right after boot)
 		//WS2812_Set_AllColours(5, 6, brightness, 0, brightness);
