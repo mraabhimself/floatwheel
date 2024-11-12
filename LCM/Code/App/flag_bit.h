@@ -1,7 +1,7 @@
 #ifndef __FLAG_BIT_H
 #define __FLAG_BIT_H
 
-#include "hk32f030m.h"
+#include <stdint.h>
 
 extern uint8_t Power_Flag;
 extern uint8_t Charge_Flag;
