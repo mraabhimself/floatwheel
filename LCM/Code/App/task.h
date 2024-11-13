@@ -16,9 +16,6 @@ typedef enum {
 #define	  CHARGE_COMMAND_TIME		1000 		// frequency of notifying the float package of current charge state
 /*******************************************************************************/
 #define   VESC_RPM_WIDTH      		-200
-#define   WS2812_1_BRIGHTNESS 		20
-#define   WS2812_2_BRIGHTNESS 		10
-#define   WS2812_3_BRIGHTNESS 		5
 #define   CHARGE_CURRENT			0.12
 #define   DETECTION_SWITCH_TIME     500
 #define   CHARGER_DETECTION_DELAY	1000

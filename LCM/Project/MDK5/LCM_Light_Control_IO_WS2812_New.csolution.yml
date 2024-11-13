@@ -9,6 +9,13 @@ solution:
     - USE_BUZZER
     - DUTY_CYCLE_BEEP_PERCENT: 90
     - AUTO_SHUTDOWN_TIME: 10
+    # Brightness: 0 (off) - 255 (max)
+    - FRONT_REAR_BRIGHTNESS_1: 0
+    - FRONT_REAR_BRIGHTNESS_2: 150
+    - FRONT_REAR_BRIGHTNESS_3: 255
+    - STATUSBAR_BRIGHTNESS_1: 5
+    - STATUSBAR_BRIGHTNESS_2: 10
+    - STATUSBAR_BRIGHTNESS_3: 20
 
   target-types:
     - type: ADV

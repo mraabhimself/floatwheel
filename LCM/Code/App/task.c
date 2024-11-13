@@ -55,8 +55,8 @@ static void lcmConfigReset(void)
 }
 
 // brightnesses for Gear 1, 2, 3:
-int headlight_brightnesses[] = { 0, 150, 255 };
-int status_brightnesses[] = { WS2812_1_BRIGHTNESS, WS2812_2_BRIGHTNESS, WS2812_3_BRIGHTNESS };
+int headlight_brightnesses[] = { FRONT_REAR_BRIGHTNESS_1, FRONT_REAR_BRIGHTNESS_2, FRONT_REAR_BRIGHTNESS_3 };
+int status_brightnesses[] = { STATUSBAR_BRIGHTNESS_1, STATUSBAR_BRIGHTNESS_2, STATUSBAR_BRIGHTNESS_3 };
 
 /**************************************************
  * @brie   :KEY1_Task()
