@@ -63,25 +63,23 @@ int status_brightnesses[] = { WS2812_1_BRIGHTNESS, WS2812_2_BRIGHTNESS, WS2812_3
  **************************************************/
 void PowerButtonTask(void)
 {
-	if(powerButtonState == 0)// || Power_Flag == PWR_FLAG_VESC_OFF)  //充电器供电按键不起作用
-	{
+	if(powerButtonState == NOT_PRESSED) { // || Power_Flag == PWR_FLAG_VESC_OFF)  //充电器供电按键不起作用
 		return;
 	}
 	
 	switch(powerButtonState)
 	{
-		case 1:         // Click
-			if(Power_Flag != PWR_FLAG_BOOTED)
-			{
-				Power_Flag = PWR_FLAG_BOOTING;  // VESC power on
+		case SINGLE_PRESS:
+			if(Power_Flag != PWR_FLAG_BOOTED) {
+				Power_Flag = PWR_FLAG_BOOTING;
 				lcmConfigReset();
 			}
 		break;
 
-		case 2:         // Double click
-			if(Power_Flag == PWR_FLAG_BOOTED) // Power on completed
-			{
+		case DOUBLE_PRESS:
+			if(Power_Flag == PWR_FLAG_BOOTED) {
 				lcmConfig.isSet = false; // Ignore LCM config when manually changing brightness
+
 				Light_Profile++;
 				if (Light_Profile > LIGHT_PROFILE_3)
 				{
@@ -90,32 +88,25 @@ void PowerButtonTask(void)
 			}
 		break;
 
-		case 3:         // Long press
+		case LONG_PRESS:
 			if (Power_Flag < PWR_FLAG_VESC_OFF) {
-				Power_Flag = PWR_FLAG_START_POWEROFF;  // VESC power off
+				Power_Flag = PWR_FLAG_START_POWEROFF;
 				Power_Time = 0;
 			}
 		break;
 
-		case 4:         // Three presses
-			if(Power_Flag == PWR_FLAG_BOOTED) // Boot completed
-			{
+		case TRIPLE_PRESS:
+			if(Power_Flag == PWR_FLAG_BOOTED) {
 				Idle_Time = 0;
 				if(Buzzer_Flag == BUZZER_FLAG_DOUBLE)
-				{
 					Buzzer_Flag = BUZZER_FLAG_SINGLE;
-				}
 				else
-				{
 					Buzzer_Flag = BUZZER_FLAG_DOUBLE;
-				}
 			}
 		break;
 	}
 
-	powerButtonState = 0;
-
-	// Reset back to showing battery percentage for a couple seconds
+	powerButtonState = NOT_PRESSED;
 }
 
 /**************************************************
