@@ -81,7 +81,7 @@ project:
         - file: ../../Code/Drive/spi.c
         - file: ../../Code/Drive/power.c
         - file: ../../Code/Drive/led_pwm.c
-        - file: ../../Code/Drive/key.c
+        - file: ../../Code/Drive/power_button.c
         - file: ../../Code/Drive/buzzer.c
         - file: ../../Code/Drive/usart.c
         - file: ../../Code/Drive/adc.c

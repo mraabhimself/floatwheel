@@ -26,7 +26,7 @@ typedef enum {
 #define   DEFAULT_IDLE_MODE			0
 
 void LED_Task(void);
-void KEY1_Task(void);
+void PowerButtonTask(void);
 void WS2812_Task(void);
 void Power_Task(void);
 void Charge_Task(void);

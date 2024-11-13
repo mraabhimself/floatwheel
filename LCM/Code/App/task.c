@@ -1,10 +1,13 @@
 #include "task.h"
+#include "adc.h"
+#include "buzzer.h"
 #include "flag_bit.h"
 #include "math.h"
 #include "eeprom.h"
 #include "datatypes.h"
-#include "key.h"
+#include "power_button.h"
 #include "led.h"
+#include "power.h"
 #include "vesc_uasrt.h"
 #include "ws2812.h"
 #include "lcm.h"
@@ -58,14 +61,14 @@ int status_brightnesses[] = { WS2812_1_BRIGHTNESS, WS2812_2_BRIGHTNESS, WS2812_3
 /**************************************************
  * @brie   :KEY1_Task()
  **************************************************/
-void KEY1_Task(void)
+void PowerButtonTask(void)
 {
-	if(KEY1_State == 0)// || Power_Flag == PWR_FLAG_VESC_OFF)  //充电器供电按键不起作用
+	if(powerButtonState == 0)// || Power_Flag == PWR_FLAG_VESC_OFF)  //充电器供电按键不起作用
 	{
 		return;
 	}
 	
-	switch(KEY1_State)
+	switch(powerButtonState)
 	{
 		case 1:         // Click
 			if(Power_Flag != PWR_FLAG_BOOTED)
@@ -110,7 +113,7 @@ void KEY1_Task(void)
 		break;
 	}
 
-	KEY1_State = 0;
+	powerButtonState = 0;
 
 	// Reset back to showing battery percentage for a couple seconds
 }

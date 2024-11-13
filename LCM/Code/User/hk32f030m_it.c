@@ -11,17 +11,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "hk32f030m_it.h"
 #include "hk32f030m.h"
-#include "led.h"
-#include "key.h"
-#include "ws2812.h"
-#include "vesc_uasrt.h"
-#include "buzzer.h"
-#include "test.h"
-#include "flag_bit.h"
-#include "task.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "ws2812.h"
+#include "vesc_uasrt.h"
+#include "buzzer.h"
+#include "flag_bit.h"
+#include "power_button.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -154,7 +151,7 @@ void TIM6_IRQHandler(void)
 		if (Idle_Time < 30000)
 			Idle_Time++;
 		
-		KEY1_Scan();
+		monitorPowerButton();
 #ifdef USE_BUZZER
 		Buzzer_Scan();
 #endif
